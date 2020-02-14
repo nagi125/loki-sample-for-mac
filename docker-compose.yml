@@ -1,0 +1,37 @@
+version: "3"
+networks:
+  loki:
+services:
+  grafana:
+    image: grafana/grafana:master
+    ports:
+      - 3000:3000
+    networks:
+      - loki
+
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - 3100:3100
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - loki
+
+  promtail:
+    image: grafana/promtail:latest
+    volumes:
+      - ./var/log:/var/log
+      - ./promtail-sample-config.yaml:/etc/promtail/promtail-sample-config.yaml
+    command: -config.file=/etc/promtail/promtail-sample-config.yaml
+    networks:
+      - loki
+
+  nginx: 
+    image: nginx:latest
+    volumes:
+      - ./var/log:/var/log
+    ports:
+      - 8080:80
+    networks:
+      - loki
+
